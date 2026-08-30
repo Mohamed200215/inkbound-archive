@@ -9,7 +9,7 @@ export function Footer() {
           INKBOUND<span className="text-teal-500 dark:text-teal-400">.</span>
         </p>
         <p className="text-xs text-neutral-500">
-          Manga data and cover art via MangaDex &middot; unofficial, non-commercial client
+          Manga data and cover art via AniList &middot; unofficial, non-commercial client
         </p>
       </div>
     </footer>

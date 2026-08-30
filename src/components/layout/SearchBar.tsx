@@ -2,7 +2,7 @@ import { Loader2, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useMangaDetail } from "@/hooks/useMangaDetail";
 import { cn } from "@/lib/utils";
-import { searchTitles } from "@/lib/mangadex";
+import { searchTitles } from "@/lib/anilist";
 import type { Manga } from "@/types/manga";
 
 interface SearchBarProps {
@@ -82,7 +82,7 @@ export function SearchBar({ className }: SearchBarProps) {
               handleSelect(results[0]);
             }
           }}
-          placeholder="Search MangaDex..."
+          placeholder="Search titles..."
           aria-label="Search manga titles"
           className="w-32 bg-transparent text-sm text-neutral-900 placeholder:text-neutral-500 outline-none sm:w-48 dark:text-neutral-100"
         />
@@ -108,7 +108,7 @@ export function SearchBar({ className }: SearchBarProps) {
       {open && query.trim() && (
         <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-72 overflow-hidden rounded-lg border border-black/10 bg-white shadow-xl shadow-black/10 dark:border-white/10 dark:bg-neutral-950 dark:shadow-black/50">
           {loading && results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-neutral-500">Searching MangaDex...</p>
+            <p className="px-4 py-3 text-sm text-neutral-500">Searching...</p>
           ) : results.length === 0 ? (
             <p className="px-4 py-3 text-sm text-neutral-500">
               No titles match "{query}".

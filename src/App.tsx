@@ -45,7 +45,7 @@ function ArchiveContent() {
       {error && (
         <div className="flex flex-col items-center gap-3 px-6 py-24 text-center">
           <p className="text-sm text-rose-500 dark:text-rose-400">
-            Couldn't reach MangaDex: {error}
+            Couldn't reach AniList: {error}
           </p>
           <Button variant="outline" size="sm" onClick={retry}>
             Try again

@@ -80,7 +80,18 @@ interface AniListMedia {
   externalLinks: { site: string; url: string }[] | null;
 }
 
-const MEDIA_FIELDS = `
+/**
+ * `staff` and `externalLinks` are each individually expensive for AniList
+ * to resolve per title (a nested staff/character-table join) — cheap for
+ * a dozen titles, but multiplied across the 200-title catalog fetch this
+ * was the single biggest cause of a 15-20s initial load, sometimes a
+ * gateway timeout outright. Grid/list views never render author or buy
+ * links anyway (`MangaCard` doesn't show them, and the "Unknown"/generic
+ * fallback both degrade gracefully), so `CATALOG_FIELDS` drops them for
+ * the bulk fetch; `fetchMangaDetail` fills them back in with one cheap
+ * single-item query when a title's detail view actually opens.
+ */
+const CATALOG_FIELDS = `
   id
   title { romaji english }
   genres
@@ -90,6 +101,10 @@ const MEDIA_FIELDS = `
   startDate { year }
   description(asHtml: false)
   coverImage { extraLarge large }
+`;
+
+const MEDIA_FIELDS = `
+  ${CATALOG_FIELDS}
   staff(perPage: 4, sort: RELEVANCE) {
     edges { role node { name { full } } }
   }
@@ -215,7 +230,7 @@ export async function fetchCatalog(totalLimit = 200): Promise<Manga[]> {
     (_, i) => `
       page${i}: Page(page: ${i + 1}, perPage: ${PAGE_SIZE}) {
         media(type: MANGA, sort: POPULARITY_DESC, isAdult: false) {
-          ${MEDIA_FIELDS}
+          ${CATALOG_FIELDS}
         }
       }`,
   ).join("\n");
@@ -294,6 +309,29 @@ export async function fetchByIds(ids: string[]): Promise<Manga[]> {
     { ids: numericIds, perPage: numericIds.length },
   );
   return data.Page.media.map(toDomainManga);
+}
+
+/**
+ * Fetches full detail — including author and buy/read links, both
+ * dropped from the lean catalog fetch — for exactly one title. A single
+ * item makes `staff`/`externalLinks` cheap regardless of how the title
+ * was found, so the detail dialog calls this on open to backfill those
+ * two fields over whatever lean data it was opened with.
+ */
+export async function fetchMangaDetail(mangaId: string): Promise<Manga | null> {
+  const numericId = Number(mangaId);
+  if (!Number.isFinite(numericId)) return null;
+
+  const data = await anilistRequest<{ Media: AniListMedia | null }>(
+    `query($id: Int) {
+      Media(id: $id, type: MANGA) {
+        ${MEDIA_FIELDS}
+      }
+    }`,
+    { id: numericId },
+  );
+
+  return data.Media ? toDomainManga(data.Media) : null;
 }
 
 /**

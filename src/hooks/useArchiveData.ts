@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { fetchCatalog, fetchFeatured, fetchGenres } from "@/lib/anilist";
 import type { GenreSummary, Manga } from "@/types/manga";
 
 interface ArchiveDataState {
   catalog: Manga[];
+  /** True until the ~200-title catalog fetch resolves — independent of `loading`, see below. */
+  catalogLoading: boolean;
   featured: Manga[];
   genres: GenreSummary[];
   loading: boolean;
@@ -12,6 +15,7 @@ interface ArchiveDataState {
 
 const INITIAL_STATE: ArchiveDataState = {
   catalog: [],
+  catalogLoading: true,
   featured: [],
   genres: [],
   loading: true,
@@ -19,10 +23,18 @@ const INITIAL_STATE: ArchiveDataState = {
 };
 
 /**
- * Loads the initial AniList data set: the browse catalog, featured titles,
- * and genre tags. Exposes `retry` since this hits a third-party API that
- * can transiently fail (rate limiting, a network blip) independent of
- * anything wrong with the app itself.
+ * Loads the initial AniList data set. `featured` + `genres` are cheap
+ * (small, fast queries) and gate `loading` — the splash screen and page
+ * shell no longer wait on the full catalog. The ~200-title catalog fetch
+ * is comparatively expensive (AniList takes noticeably longer per title
+ * at that volume) and resolves independently via `catalogLoading`, which
+ * only the catalog-dependent sections (genre "All" tab, A–Z index) block
+ * on — so the page becomes usable in the time the fast path takes, not
+ * however long the full catalog happens to take.
+ *
+ * Exposes `retry` since this hits a third-party API that can transiently
+ * fail (rate limiting, a network blip) independent of anything wrong with
+ * the app itself.
  */
 export function useArchiveData(): ArchiveDataState & { retry: () => void } {
   const [state, setState] = useState<ArchiveDataState>(INITIAL_STATE);
@@ -30,18 +42,30 @@ export function useArchiveData(): ArchiveDataState & { retry: () => void } {
 
   useEffect(() => {
     let cancelled = false;
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState({ ...INITIAL_STATE });
 
-    Promise.all([fetchCatalog(200), fetchFeatured(12), fetchGenres()])
-      .then(([catalog, featured, genres]) => {
+    Promise.all([fetchFeatured(12), fetchGenres()])
+      .then(([featured, genres]) => {
         if (cancelled) return;
-        setState({ catalog, featured, genres, loading: false, error: null });
+        setState((prev) => ({ ...prev, featured, genres, loading: false }));
       })
       .catch((err: unknown) => {
         if (cancelled) return;
         const message =
           err instanceof Error ? err.message : "Failed to load the archive from AniList.";
-        setState({ catalog: [], featured: [], genres: [], loading: false, error: message });
+        setState((prev) => ({ ...prev, loading: false, catalogLoading: false, error: message }));
+      });
+
+    fetchCatalog(200)
+      .then((catalog) => {
+        if (cancelled) return;
+        setState((prev) => ({ ...prev, catalog, catalogLoading: false }));
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setState((prev) => ({ ...prev, catalogLoading: false }));
+        const message = err instanceof Error ? err.message : "Failed to load the full catalog.";
+        toast.error("Couldn't load the full catalog", { description: message });
       });
 
     return () => {

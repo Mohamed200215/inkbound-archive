@@ -54,7 +54,9 @@ export function MangaCard({ manga, className, widthClassName }: MangaCardProps) 
             <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-white">
               {manga.title}
             </h3>
-            <p className="text-xs text-neutral-400">{manga.author}</p>
+            {manga.author !== "Unknown" && (
+              <p className="text-xs text-neutral-400">{manga.author}</p>
+            )}
 
             <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-1 text-xs font-medium text-amber-400">

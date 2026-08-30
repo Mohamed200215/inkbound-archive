@@ -7,20 +7,22 @@ import type { GenreSummary, Manga } from "@/types/manga";
 interface GenreSectionProps {
   /** The loaded browse catalog, shown for the "All" chip (no extra fetch). */
   catalog: Manga[];
+  /** True while the ~200-title catalog is still loading — only blocks the "All" chip; other genres fetch independently. */
+  catalogLoading: boolean;
   genres: GenreSummary[];
 }
 
 const ALL_GENRE: GenreSummary = { id: "all", name: "All" };
 
-export function GenreSection({ catalog, genres }: GenreSectionProps) {
+export function GenreSection({ catalog, catalogLoading, genres }: GenreSectionProps) {
   const [activeGenre, setActiveGenre] = useState<GenreSummary>(ALL_GENRE);
   const [genreResults, setGenreResults] = useState<Manga[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [genreLoading, setGenreLoading] = useState(false);
 
   useEffect(() => {
     if (activeGenre.id === "all") return;
     let cancelled = false;
-    setLoading(true);
+    setGenreLoading(true);
     fetchByGenre(activeGenre.id)
       .then((manga) => {
         if (!cancelled) setGenreResults(manga);
@@ -29,14 +31,16 @@ export function GenreSection({ catalog, genres }: GenreSectionProps) {
         if (!cancelled) setGenreResults([]);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setGenreLoading(false);
       });
     return () => {
       cancelled = true;
     };
   }, [activeGenre]);
 
-  const visible = activeGenre.id === "all" ? catalog : genreResults;
+  const isAll = activeGenre.id === "all";
+  const visible = isAll ? catalog : genreResults;
+  const loading = isAll ? catalogLoading : genreLoading;
 
   return (
     <div>

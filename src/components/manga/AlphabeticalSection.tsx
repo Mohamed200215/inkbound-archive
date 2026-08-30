@@ -4,11 +4,13 @@ import type { Manga } from "@/types/manga";
 
 interface AlphabeticalSectionProps {
   manga: Manga[];
+  /** True while the ~200-title catalog is still loading. */
+  loading?: boolean;
 }
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-export function AlphabeticalSection({ manga }: AlphabeticalSectionProps) {
+export function AlphabeticalSection({ manga, loading = false }: AlphabeticalSectionProps) {
   const grouped = useMemo(() => {
     const map = new Map<string, Manga[]>();
     for (const title of [...manga].sort((a, b) => a.title.localeCompare(b.title))) {
@@ -25,6 +27,14 @@ export function AlphabeticalSection({ manga }: AlphabeticalSectionProps) {
     () => new Set(grouped.keys()),
     [grouped],
   );
+
+  if (loading) {
+    return (
+      <p className="py-12 text-center text-sm text-neutral-500">
+        Loading the full catalog...
+      </p>
+    );
+  }
 
   return (
     <div>

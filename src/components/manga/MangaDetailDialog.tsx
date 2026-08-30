@@ -6,9 +6,9 @@ import { MangaCoverImage } from "@/components/manga/MangaCoverImage";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useFavorites } from "@/hooks/useFavorites";
-import { fetchRecommendations, fetchVolumeCovers } from "@/lib/anilist";
+import { fetchMangaDetail, fetchRecommendations, fetchVolumeCovers } from "@/lib/anilist";
 import { cn } from "@/lib/utils";
-import type { Manga, VolumeCover } from "@/types/manga";
+import type { BuyLink, Manga, VolumeCover } from "@/types/manga";
 
 const STATUS_LABEL: Record<Manga["status"], string> = {
   ongoing: "Ongoing",
@@ -42,9 +42,11 @@ export function MangaDetailDialog({ manga, loading = false, onOpenChange }: Mang
   const [selectedVolume, setSelectedVolume] = useState<VolumeCover | null>(null);
   const [recommendations, setRecommendations] = useState<Manga[]>([]);
   const [recsLoading, setRecsLoading] = useState(false);
+  const [fullDetail, setFullDetail] = useState<{ author: string; buyLinks: BuyLink[] } | null>(null);
 
   useEffect(() => {
     setSelectedVolume(null);
+    setFullDetail(null);
     if (!manga) {
       setVolumes([]);
       setRecommendations([]);
@@ -52,6 +54,20 @@ export function MangaDetailDialog({ manga, loading = false, onOpenChange }: Mang
     }
 
     let cancelled = false;
+
+    // The catalog/genre/A-Z list this title may have been opened from
+    // fetches a lean field set (no author, no buy links — see
+    // `CATALOG_FIELDS` in anilist.ts) to keep bulk loading fast. Backfill
+    // both here with one cheap single-item fetch, regardless of source.
+    fetchMangaDetail(manga.id)
+      .then((detail) => {
+        if (!cancelled && detail) {
+          setFullDetail({ author: detail.author, buyLinks: detail.buyLinks });
+        }
+      })
+      .catch(() => {
+        /* keep whatever lean data the card already had */
+      });
 
     setVolumesLoading(true);
     fetchVolumeCovers(manga.id)
@@ -98,6 +114,8 @@ export function MangaDetailDialog({ manga, loading = false, onOpenChange }: Mang
 
   const favorited = manga ? isFavorite(manga.id) : false;
   const displayedManga = manga && selectedVolume ? { ...manga, coverImage: selectedVolume.coverImage } : manga;
+  const author = fullDetail?.author ?? manga?.author ?? "";
+  const buyLinks = fullDetail?.buyLinks ?? manga?.buyLinks ?? [];
 
   return (
     <Dialog open={Boolean(manga) || loading} onOpenChange={onOpenChange}>
@@ -180,7 +198,9 @@ export function MangaDetailDialog({ manga, loading = false, onOpenChange }: Mang
                   <Share2 className="h-4 w-4" />
                 </button>
               </div>
-              <p className="text-sm text-neutral-500">{manga.author}</p>
+              {author && author !== "Unknown" && (
+                <p className="text-sm text-neutral-500">{author}</p>
+              )}
 
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
                 <span className="flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
@@ -228,7 +248,7 @@ export function MangaDetailDialog({ manga, loading = false, onOpenChange }: Mang
                   Where to read or buy
                 </h3>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {manga.buyLinks.map((link) => (
+                  {buyLinks.map((link) => (
                     <a
                       key={link.url}
                       href={link.url}

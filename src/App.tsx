@@ -35,7 +35,7 @@ function SectionHeading({
 }
 
 function ArchiveContent() {
-  const { catalog, featured, genres, loading, error, retry } = useArchiveData();
+  const { catalog, catalogLoading, featured, genres, loading, error, retry } = useArchiveData();
 
   return (
     <div id="top" className="min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
@@ -63,12 +63,12 @@ function ArchiveContent() {
 
           <section id="genres" className="scroll-mt-16 border-t border-black/5 pb-16 pt-16 dark:border-white/5">
             <SectionHeading eyebrow="Browse" title="By genre" />
-            <GenreSection catalog={catalog} genres={genres} />
+            <GenreSection catalog={catalog} catalogLoading={catalogLoading} genres={genres} />
           </section>
 
           <section id="a-z" className="scroll-mt-16 border-t border-black/5 pb-16 pt-16 dark:border-white/5">
             <SectionHeading eyebrow="Loaded catalog" title="A–Z index" />
-            <AlphabeticalSection manga={catalog} />
+            <AlphabeticalSection manga={catalog} loading={catalogLoading} />
           </section>
 
           <section id="favourites" className="scroll-mt-16 border-t border-black/5 pb-16 pt-16 dark:border-white/5">

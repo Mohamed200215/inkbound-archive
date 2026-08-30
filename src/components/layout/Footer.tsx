@@ -11,6 +11,12 @@ export function Footer() {
         <p className="text-xs text-neutral-500">
           Manga data and cover art via AniList &middot; unofficial, non-commercial client
         </p>
+        <a
+          href="#legal"
+          className="text-xs text-neutral-500 underline decoration-neutral-400 underline-offset-2 hover:text-neutral-900 dark:hover:text-neutral-100"
+        >
+          Terms & privacy
+        </a>
       </div>
     </footer>
   );

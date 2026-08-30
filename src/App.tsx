@@ -6,6 +6,7 @@ import { AlphabeticalSection } from "@/components/manga/AlphabeticalSection";
 import { FavoritesSection } from "@/components/manga/FavoritesSection";
 import { FeaturedCarousel } from "@/components/manga/FeaturedCarousel";
 import { GenreSection } from "@/components/manga/GenreSection";
+import { LegalSection } from "@/components/manga/LegalSection";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthProvider";
@@ -78,6 +79,11 @@ function ArchiveContent() {
           <section id="about" className="scroll-mt-16 border-t border-black/5 pt-16 dark:border-white/5">
             <SectionHeading eyebrow="Inkbound Archive" title="About this site" />
             <AboutSection />
+          </section>
+
+          <section id="legal" className="scroll-mt-16 border-t border-black/5 pb-4 pt-16 dark:border-white/5">
+            <SectionHeading eyebrow="The fine print" title="Terms & privacy" />
+            <LegalSection />
           </section>
         </main>
       )}

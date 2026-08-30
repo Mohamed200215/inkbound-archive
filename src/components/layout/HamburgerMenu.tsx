@@ -1,4 +1,4 @@
-import { BookMarked, Heart, Info, Menu, SortAsc } from "lucide-react";
+import { BookMarked, Heart, Info, Menu, Scale, SortAsc } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { id: "a-z", label: "A–Z", icon: SortAsc },
   { id: "favourites", label: "Favourites", icon: Heart },
   { id: "about", label: "About", icon: Info },
+  { id: "legal", label: "Terms & privacy", icon: Scale },
 ] as const;
 
 export function HamburgerMenu() {

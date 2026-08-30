@@ -297,6 +297,40 @@ export async function fetchByIds(ids: string[]): Promise<Manga[]> {
 }
 
 /**
+ * Titles AniList's own recommendation graph associates with this one,
+ * ranked by community rating. Powers the detail view's "You might also
+ * like" section — reuses `MEDIA_FIELDS` so each result is a fully-formed
+ * `Manga`, cards render with no follow-up fetch.
+ */
+export async function fetchRecommendations(mangaId: string, limit = 8): Promise<Manga[]> {
+  const numericId = Number(mangaId);
+  if (!Number.isFinite(numericId)) return [];
+
+  const data = await anilistRequest<{
+    Media: { recommendations: { nodes: { mediaRecommendation: AniListMedia | null }[] } } | null;
+  }>(
+    `query($id: Int, $perPage: Int) {
+      Media(id: $id, type: MANGA) {
+        recommendations(sort: RATING_DESC, perPage: $perPage) {
+          nodes {
+            mediaRecommendation {
+              ${MEDIA_FIELDS}
+            }
+          }
+        }
+      }
+    }`,
+    { id: numericId, perPage: limit },
+  );
+
+  const nodes = data.Media?.recommendations.nodes ?? [];
+  return nodes
+    .map((node) => node.mediaRecommendation)
+    .filter((media): media is AniListMedia => media !== null)
+    .map(toDomainManga);
+}
+
+/**
  * AniList's genres are a fixed, enum-backed list rather than a queryable
  * collection of taggable entities (confirmed via `GenreCollection`), so
  * this is hardcoded instead of fetched — one less network round trip on

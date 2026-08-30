@@ -2,7 +2,7 @@ import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MangaCard } from "@/components/manga/MangaCard";
 import { useFavorites } from "@/hooks/useFavorites";
-import { fetchByIds } from "@/lib/mangadex";
+import { fetchByIds } from "@/lib/anilist";
 import type { Manga } from "@/types/manga";
 
 export function FavoritesSection() {

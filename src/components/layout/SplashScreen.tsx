@@ -11,7 +11,7 @@ interface SplashScreenProps {
 }
 
 /**
- * Full-screen cover shown while the initial MangaDex fetch (catalog,
+ * Full-screen cover shown while the initial AniList fetch (catalog,
  * featured, genres) is in flight. Fades out and unmounts once loading
  * finishes; reappears if `loading` goes true again (e.g. a retry).
  */
@@ -45,7 +45,7 @@ export function SplashScreen({ loading }: SplashScreenProps) {
       />
       <div className="flex items-center gap-2 text-sm text-neutral-500">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Loading the archive from MangaDex...
+        Loading the archive from AniList...
       </div>
     </div>
   );

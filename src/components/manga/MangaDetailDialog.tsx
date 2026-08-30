@@ -4,7 +4,7 @@ import { MangaCoverImage } from "@/components/manga/MangaCoverImage";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useFavorites } from "@/hooks/useFavorites";
-import { fetchVolumeCovers } from "@/lib/mangadex";
+import { fetchVolumeCovers } from "@/lib/anilist";
 import { cn } from "@/lib/utils";
 import type { Manga, VolumeCover } from "@/types/manga";
 
@@ -21,10 +21,11 @@ interface MangaDetailDialogProps {
 }
 
 /**
- * The expanded view for a title: cover (with a per-volume picker when
- * MangaDex has volume-specific art) on one side, series info and
+ * The expanded view for a title: cover (with a per-volume picker when the
+ * data source has volume-specific art) on one side, series info and
  * "where to read/buy" links on the other. Opened from any manga card
- * via `useMangaDetail()`.
+ * via `useMangaDetail()`. AniList only tracks one cover per series, so
+ * `fetchVolumeCovers` always resolves empty and the picker doesn't render.
  */
 export function MangaDetailDialog({ manga, onOpenChange }: MangaDetailDialogProps) {
   const { isFavorite, toggleFavorite } = useFavorites();

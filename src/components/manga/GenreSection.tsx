@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MangaCard } from "@/components/manga/MangaCard";
 import { cn } from "@/lib/utils";
-import { fetchByGenre } from "@/lib/mangadex";
+import { fetchByGenre } from "@/lib/anilist";
 import type { GenreSummary, Manga } from "@/types/manga";
 
 interface GenreSectionProps {

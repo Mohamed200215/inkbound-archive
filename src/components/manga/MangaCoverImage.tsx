@@ -8,7 +8,7 @@ interface MangaCoverImageProps {
 }
 
 /**
- * Real MangaDex cover art layered over the generated placeholder tile.
+ * Real AniList cover art layered over the generated placeholder tile.
  * The placeholder always renders first, so a missing cover, a slow
  * network, or a broken image URL all resolve to the same visible
  * fallback instead of a blank tile.

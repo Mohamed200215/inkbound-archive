@@ -2,20 +2,20 @@
 
 A single-page manga archive — browse by genre, alphabetically, or by what's trending, with real-time search and cross-device favourites.
 
-Manga data, cover art, and genre tags come live from the [MangaDex API](https://api.mangadex.org). Accounts and favourites are backed by [Supabase](https://supabase.com); favourites work for guests too (stored locally) and get merged into an account on first login.
+Manga data, cover art, and genre tags come live from the [AniList GraphQL API](https://anilist.gitbook.io/anilist-apiv2-docs). Accounts and favourites are backed by [Supabase](https://supabase.com); favourites work for guests too (stored locally) and get merged into an account on first login.
 
 ## Features
 
-- **Live catalog** — featured/trending carousel, genre browsing, and an A–Z index sourced from MangaDex's most-followed titles
-- **Real-time search** — debounced, queries MangaDex's full library directly (not limited to the loaded catalog)
-- **Manga detail view** — cover art with a per-volume picker (when MangaDex has volume-specific covers), synopsis, ratings, and "where to read/buy" links (official links when MangaDex has them, search-based fallbacks otherwise)
+- **Live catalog** — featured/trending carousel, genre browsing, and an A–Z index sourced from AniList's most-popular titles
+- **Real-time search** — debounced, queries AniList's full library directly (not limited to the loaded catalog)
+- **Manga detail view** — cover art, synopsis, ratings, and "where to read/buy" links (official links when AniList has them, search-based fallbacks otherwise)
 - **Accounts & favourites** — email/password auth via Supabase; guests get localStorage-backed favourites that merge into the account on first login
 - **Light/dark theme**, remembered between visits
 - **Full-screen loading cover** while the initial data set loads
 
 ## Stack
 
-React 19 · TypeScript · Vite · Tailwind CSS v4 · shadcn/ui (Radix primitives) · Supabase (Auth + Postgres) · `mangadex-full-api`
+React 19 · TypeScript · Vite · Tailwind CSS v4 · shadcn/ui (Radix primitives) · Supabase (Auth + Postgres) · AniList GraphQL API
 
 ## Getting started
 
@@ -54,13 +54,14 @@ src/
     ui/         # shadcn/ui primitives
   context/      # Theme, auth, favourites, manga-detail providers
   hooks/        # Consumer hooks for the above
-  lib/          # MangaDex client + domain mapping, Supabase client, utils
-  types/        # Domain types (independent of MangaDex's own API shapes)
+  lib/          # AniList client + domain mapping, Supabase client, utils
+  types/        # Domain types (independent of AniList's own API shapes)
 supabase/
   schema.sql    # favorites table + RLS policies
 ```
 
 ## Notes
 
-- This is an unofficial, non-commercial client of the public MangaDex API. All manga data and cover art belong to their original creators and publishers.
-- The genre and A–Z sections index a working set of MangaDex's ~200 most-followed titles, not its full library — search reaches everything else live.
+- This is an unofficial, non-commercial client of the public AniList API. All manga data and cover art belong to their original creators and publishers.
+- The genre and A–Z sections index a working set of AniList's ~200 most-popular titles, not its full library — search reaches everything else live.
+- AniList tracks one cover per series (no per-volume art like MangaDex had), so the detail view no longer shows a volume picker.

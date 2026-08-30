@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { fetchCatalog, fetchFeatured, fetchGenres } from "@/lib/mangadex";
+import { fetchCatalog, fetchFeatured, fetchGenres } from "@/lib/anilist";
 import type { GenreSummary, Manga } from "@/types/manga";
 
 interface ArchiveDataState {
@@ -19,7 +19,7 @@ const INITIAL_STATE: ArchiveDataState = {
 };
 
 /**
- * Loads the initial MangaDex data set: the browse catalog, featured titles,
+ * Loads the initial AniList data set: the browse catalog, featured titles,
  * and genre tags. Exposes `retry` since this hits a third-party API that
  * can transiently fail (rate limiting, a network blip) independent of
  * anything wrong with the app itself.
@@ -40,7 +40,7 @@ export function useArchiveData(): ArchiveDataState & { retry: () => void } {
       .catch((err: unknown) => {
         if (cancelled) return;
         const message =
-          err instanceof Error ? err.message : "Failed to load the archive from MangaDex.";
+          err instanceof Error ? err.message : "Failed to load the archive from AniList.";
         setState({ catalog: [], featured: [], genres: [], loading: false, error: message });
       });
 

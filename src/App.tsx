@@ -1,5 +1,6 @@
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PasswordRecoveryDialog } from "@/components/layout/PasswordRecoveryDialog";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { AboutSection } from "@/components/manga/AboutSection";
 import { AlphabeticalSection } from "@/components/manga/AlphabeticalSection";
@@ -90,6 +91,7 @@ function ArchiveContent() {
 
       <Footer />
       <Toaster position="bottom-right" />
+      <PasswordRecoveryDialog />
     </div>
   );
 }

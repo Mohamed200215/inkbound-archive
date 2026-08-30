@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This is a single-page app with one crawlable URL — manga detail views
+  use a `?manga=<id>` query param on the same page rather than distinct
+  server routes, so there's nothing else here for a crawler to index
+  (a real per-title sitemap would need server-rendered/static routes,
+  which this app deliberately doesn't have; see MangaDetailProvider.tsx).
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://inkbound-archive.vercel.app/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

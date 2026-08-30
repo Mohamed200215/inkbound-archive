@@ -1,8 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MangaCard } from "@/components/manga/MangaCard";
 import { cn } from "@/lib/utils";
 import { fetchByGenre } from "@/lib/anilist";
-import type { GenreSummary, Manga } from "@/types/manga";
+import type { GenreSummary, Manga, MangaStatus } from "@/types/manga";
+
+type SortOption = "popularity" | "rating" | "newest";
+
+const SORT_OPTIONS: { id: SortOption; label: string }[] = [
+  { id: "popularity", label: "Popularity" },
+  { id: "rating", label: "Highest rated" },
+  { id: "newest", label: "Newest" },
+];
+
+const STATUS_OPTIONS: { id: MangaStatus | "all"; label: string }[] = [
+  { id: "all", label: "All statuses" },
+  { id: "ongoing", label: "Ongoing" },
+  { id: "completed", label: "Completed" },
+  { id: "hiatus", label: "Hiatus" },
+  { id: "cancelled", label: "Cancelled" },
+];
+
+/** AniList already returns titles popularity-sorted, so "Popularity" is a no-op — everything else sorts client-side over whatever's already loaded. */
+function sortManga(manga: Manga[], sort: SortOption): Manga[] {
+  if (sort === "popularity") return manga;
+  const sorted = [...manga];
+  if (sort === "rating") {
+    sorted.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+  } else {
+    sorted.sort((a, b) => (b.year ?? -1) - (a.year ?? -1));
+  }
+  return sorted;
+}
 
 interface GenreSectionProps {
   /** The loaded browse catalog, shown for the "All" chip (no extra fetch). */
@@ -18,6 +46,8 @@ export function GenreSection({ catalog, catalogLoading, genres }: GenreSectionPr
   const [activeGenre, setActiveGenre] = useState<GenreSummary>(ALL_GENRE);
   const [genreResults, setGenreResults] = useState<Manga[]>([]);
   const [genreLoading, setGenreLoading] = useState(false);
+  const [sort, setSort] = useState<SortOption>("popularity");
+  const [statusFilter, setStatusFilter] = useState<MangaStatus | "all">("all");
 
   useEffect(() => {
     if (activeGenre.id === "all") return;
@@ -39,8 +69,13 @@ export function GenreSection({ catalog, catalogLoading, genres }: GenreSectionPr
   }, [activeGenre]);
 
   const isAll = activeGenre.id === "all";
-  const visible = isAll ? catalog : genreResults;
+  const base = isAll ? catalog : genreResults;
   const loading = isAll ? catalogLoading : genreLoading;
+
+  const visible = useMemo(() => {
+    const filtered = statusFilter === "all" ? base : base.filter((m) => m.status === statusFilter);
+    return sortManga(filtered, sort);
+  }, [base, statusFilter, sort]);
 
   return (
     <div>
@@ -60,6 +95,33 @@ export function GenreSection({ catalog, catalogLoading, genres }: GenreSectionPr
             {genre.name}
           </button>
         ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <select
+          aria-label="Sort by"
+          value={sort}
+          onChange={(event) => setSort(event.target.value as SortOption)}
+          className="rounded-md border border-black/10 bg-black/[0.02] px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-neutral-300"
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.id} value={option.id}>
+              Sort: {option.label}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Filter by status"
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as MangaStatus | "all")}
+          className="rounded-md border border-black/10 bg-black/[0.02] px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-neutral-300"
+        >
+          {STATUS_OPTIONS.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loading ? (

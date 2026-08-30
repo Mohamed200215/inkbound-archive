@@ -1,9 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { MangaDetailDialog } from "@/components/manga/MangaDetailDialog";
 import { MangaDetailContext } from "@/context/manga-detail-context";
 import { fetchByIds } from "@/lib/anilist";
 import type { Manga } from "@/types/manga";
+
+/**
+ * Split out of the main bundle — the detail view (plus the recommendation
+ * cards it renders) is real weight most visits never need if a user just
+ * browses the grid. Only requested once a title is actually opened; see
+ * `everOpened` below for why it then stays mounted for the rest of the
+ * session instead of being torn down and re-imported on every close.
+ */
+const MangaDetailDialog = lazy(() =>
+  import("@/components/manga/MangaDetailDialog").then((m) => ({ default: m.MangaDetailDialog })),
+);
 
 const QUERY_PARAM = "manga";
 
@@ -22,9 +32,11 @@ function readMangaIdFromUrl(): string | null {
 export function MangaDetailProvider({ children }: { children: ReactNode }) {
   const [selected, setSelected] = useState<Manga | null>(null);
   const [resolving, setResolving] = useState(false);
+  const [everOpened, setEverOpened] = useState(false);
   const pushedRef = useRef(false);
 
   const resolveFromId = useCallback(async (id: string) => {
+    setEverOpened(true);
     setResolving(true);
     try {
       const [manga] = await fetchByIds([id]);
@@ -56,6 +68,7 @@ export function MangaDetailProvider({ children }: { children: ReactNode }) {
   }, [resolveFromId]);
 
   const open = useCallback((manga: Manga) => {
+    setEverOpened(true);
     setSelected(manga);
     const url = new URL(window.location.href);
     url.searchParams.set(QUERY_PARAM, manga.id);
@@ -80,11 +93,15 @@ export function MangaDetailProvider({ children }: { children: ReactNode }) {
   return (
     <MangaDetailContext.Provider value={value}>
       {children}
-      <MangaDetailDialog
-        manga={selected}
-        loading={resolving && !selected}
-        onOpenChange={(isOpen) => !isOpen && close()}
-      />
+      {everOpened && (
+        <Suspense fallback={null}>
+          <MangaDetailDialog
+            manga={selected}
+            loading={resolving && !selected}
+            onOpenChange={(isOpen) => !isOpen && close()}
+          />
+        </Suspense>
+      )}
     </MangaDetailContext.Provider>
   );
 }

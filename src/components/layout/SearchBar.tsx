@@ -1,50 +1,26 @@
 import { Loader2, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useMangaDetail } from "@/hooks/useMangaDetail";
+import { useTitleSearch } from "@/hooks/useTitleSearch";
 import { cn } from "@/lib/utils";
-import { searchTitles } from "@/lib/anilist";
 import type { Manga } from "@/types/manga";
 
 interface SearchBarProps {
   className?: string;
 }
 
-const DEBOUNCE_MS = 350;
-
+/**
+ * The persistent search field in the navbar. Hidden below `sm:` — at
+ * mobile widths there isn't room for it next to the login button and the
+ * hamburger menu (it used to push the hamburger button off-screen
+ * entirely); mobile search instead lives inside `HamburgerMenu`'s sheet,
+ * sharing the same `useTitleSearch` hook.
+ */
 export function SearchBar({ className }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+  const { query, setQuery, results, loading } = useTitleSearch();
   const [open, setOpen] = useState(false);
-  const [results, setResults] = useState<Manga[]>([]);
-  const [loading, setLoading] = useState(false);
   const { open: openDetail } = useMangaDetail();
   const containerRef = useRef<HTMLDivElement>(null);
-  const requestId = useRef(0);
-
-  useEffect(() => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setResults([]);
-      setLoading(false);
-      return;
-    }
-
-    const thisRequest = ++requestId.current;
-    setLoading(true);
-    const timer = window.setTimeout(() => {
-      searchTitles(trimmed)
-        .then((titles) => {
-          if (requestId.current === thisRequest) setResults(titles);
-        })
-        .catch(() => {
-          if (requestId.current === thisRequest) setResults([]);
-        })
-        .finally(() => {
-          if (requestId.current === thisRequest) setLoading(false);
-        });
-    }, DEBOUNCE_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [query]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -63,7 +39,7 @@ export function SearchBar({ className }: SearchBarProps) {
   }
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
+    <div ref={containerRef} className={cn("relative hidden sm:block", className)}>
       <div className="flex items-center gap-2 rounded-lg border border-black/10 bg-black/[0.03] px-3 py-1.5 focus-within:border-teal-500/50 dark:border-white/10 dark:bg-white/[0.04] dark:focus-within:border-teal-400/50">
         <Search className="h-4 w-4 shrink-0 text-neutral-500" />
         <input
@@ -84,7 +60,7 @@ export function SearchBar({ className }: SearchBarProps) {
           }}
           placeholder="Search titles..."
           aria-label="Search manga titles"
-          className="w-32 bg-transparent text-sm text-neutral-900 placeholder:text-neutral-500 outline-none sm:w-48 dark:text-neutral-100"
+          className="w-48 bg-transparent text-sm text-neutral-900 placeholder:text-neutral-500 outline-none dark:text-neutral-100"
         />
         {loading ? (
           <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-neutral-500" />

@@ -16,22 +16,11 @@ import { MangaDetailProvider } from "@/context/MangaDetailProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { useArchiveData } from "@/hooks/useArchiveData";
 
-function SectionHeading({
-  eyebrow,
-  title,
-}: {
-  eyebrow: string;
-  title: string;
-}) {
+function SectionHeading({ title }: { title: string }) {
   return (
-    <div className="mb-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400/80">
-        {eyebrow}
-      </p>
-      <h2 className="mt-1 text-2xl font-bold text-neutral-900 sm:text-3xl dark:text-neutral-50">
-        {title}
-      </h2>
-    </div>
+    <h2 className="mb-6 text-3xl font-bold text-neutral-900 sm:text-4xl dark:text-neutral-50">
+      {title}
+    </h2>
   );
 }
 
@@ -58,32 +47,32 @@ function ArchiveContent() {
       {!loading && !error && (
         <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <section id="featured" className="scroll-mt-16 pb-16">
-            <SectionHeading eyebrow="Trending now" title="Featured this week" />
+            <SectionHeading title="Featured this week" />
             <FeaturedCarousel manga={featured} />
           </section>
 
           <section id="genres" className="scroll-mt-16 border-t border-black/5 pb-16 pt-16 dark:border-white/5">
-            <SectionHeading eyebrow="Browse" title="By genre" />
+            <SectionHeading title="By genre" />
             <GenreSection catalog={catalog} catalogLoading={catalogLoading} genres={genres} />
           </section>
 
           <section id="a-z" className="scroll-mt-16 border-t border-black/5 pb-16 pt-16 dark:border-white/5">
-            <SectionHeading eyebrow="Loaded catalog" title="A–Z index" />
+            <SectionHeading title="A–Z index" />
             <AlphabeticalSection manga={catalog} loading={catalogLoading} />
           </section>
 
           <section id="favourites" className="scroll-mt-16 border-t border-black/5 pb-16 pt-16 dark:border-white/5">
-            <SectionHeading eyebrow="Your library" title="Favourites" />
+            <SectionHeading title="Favourites" />
             <FavoritesSection />
           </section>
 
           <section id="about" className="scroll-mt-16 border-t border-black/5 pt-16 dark:border-white/5">
-            <SectionHeading eyebrow="Inkbound Archive" title="About this site" />
+            <SectionHeading title="About this site" />
             <AboutSection />
           </section>
 
           <section id="legal" className="scroll-mt-16 border-t border-black/5 pb-4 pt-16 dark:border-white/5">
-            <SectionHeading eyebrow="The fine print" title="Terms & privacy" />
+            <SectionHeading title="Terms & privacy" />
             <LegalSection />
           </section>
         </main>

@@ -1,7 +1,16 @@
+import { LogOut, User } from "lucide-react";
 import { AuthDialog } from "@/components/layout/AuthDialog";
 import { HamburgerMenu } from "@/components/layout/HamburgerMenu";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.png";
 
@@ -21,16 +30,29 @@ export function Navbar() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           {user ? (
-            <Button
-              variant="outline"
-              size="sm"
-              title={user.email}
-              onClick={() => void signOut()}
-              className="border-black/15 bg-transparent px-2.5 text-neutral-700 hover:bg-black/5 hover:text-neutral-900 sm:px-3 dark:border-white/15 dark:text-neutral-200 dark:hover:bg-white/10 dark:hover:text-white"
-            >
-              <span className="hidden max-w-40 truncate sm:inline">{user.email} &middot; Log out</span>
-              <span className="sm:hidden">Log out</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  title={user.email}
+                  className="border-black/15 bg-transparent px-2.5 text-neutral-700 hover:bg-black/5 hover:text-neutral-900 sm:px-3 dark:border-white/15 dark:text-neutral-200 dark:hover:bg-white/10 dark:hover:text-white"
+                >
+                  <User className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden max-w-40 truncate sm:inline">{user.email}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="max-w-56 truncate font-normal text-neutral-500">
+                  {user.email}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onSelect={() => void signOut()}>
+                  <LogOut />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <AuthDialog
               trigger={
